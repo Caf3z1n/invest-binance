@@ -1,6 +1,6 @@
 const api = require('./api')
 const datefns = require('date-fns')
-const env = require('../env')
+const env = require('./env')
 
 const symbol = env.SYMBOL
 const leverage = env.LEVERAGE

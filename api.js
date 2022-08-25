@@ -1,7 +1,7 @@
 const axios = require('axios')
 const querystring = require('querystring')
 const crypto = require('crypto')
-const env = require('../env')
+const env = require('./env')
 
 const apiKey = env.API_KEY
 const apiSecret = env.API_SECRET
