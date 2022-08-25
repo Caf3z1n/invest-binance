@@ -1,11 +1,12 @@
 const api = require('./api')
 const datefns = require('date-fns')
+const env = require('../env')
 
-const symbol = process.env.SYMBOL
-const leverage = process.env.LEVERAGE
-const porcentagemTake = process.env.PORCENTAGEM_TAKE
-const porcentagemStop = process.env.PORCENTAGEM_STOP
-const tradeBase = process.env.TRADE_BASE
+const symbol = env.SYMBOL
+const leverage = env.LEVERAGE
+const porcentagemTake = env.PORCENTAGEM_TAKE
+const porcentagemStop = env.PORCENTAGEM_STOP
+const tradeBase = env.TRADE_BASE
 
 let aposta = tradeBase
 let stopLossorderId = 0
@@ -160,4 +161,4 @@ setInterval(async () => {
     }
   }
   */
-}, process.env.CRAWLER_INTERVAL)
+}, env.CRAWLER_INTERVAL)
