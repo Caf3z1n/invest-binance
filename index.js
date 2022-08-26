@@ -58,64 +58,65 @@ async function realizarTrade() {
   try {
     // ORDEM A MERCADO
     let originalOrder = await createOriginalOrder()
-
-    while(!originalOrder) {
-      console.log("ERRO AO CRIAR ORDEM A MERCADO!")
-      originalOrder = await createOriginalOrder()
-    }
-
     const originalOrderPrice = originalOrder.avgPrice
 
-    linha();
     console.log('COMPRA A MERCADO')
-    console.log(`Horario: ${datefns.format(new Date(originalOrder.updateTime), "dd/MM/yyyy H:mm")}`)
+    console.log(`Horario: ${datefns.format(datefns.subHours(originalOrder.updateTime, 3), "dd/MM/yyyy H:mm")}`)
     console.log(`Preço: ${parseInt(originalOrderPrice)} USDT`)
     console.log(`Quantidade (${leverage}x): ${originalOrder.origQty} BTC`)
     pulaLinha()
-    
-    // DEFINIR O TAKE PROFIT
-    let takeProfitOrder = await createTakeProfitOrder(originalOrderPrice)
 
-    while(!takeProfitOrder) {
-      console.log("ERRO AO CRIAR TAKE PROFIT!")
-      takeProfitOrder = await takeProfitOrder(originalOrderPrice)
+    try {
+      // DEFINIR O TAKE PROFIT
+      let takeProfitOrder = await createTakeProfitOrder(originalOrderPrice)
+
+      console.log('TAKE PROFIT')
+      console.log(`Preço: ${parseInt(takeProfitOrder.stopPrice)} USDT`)
+      pulaLinha()
+
+      try {
+        // DEFINIR O STOP LOSS
+        let stopLossOrder = await createStopLossOrder(originalOrderPrice)
+
+        console.log('STOP LOSS')
+        console.log(`Preço: ${parseInt(stopLossOrder.stopPrice)} USDT`)
+        stopLossorderId = stopLossOrder.orderId
+
+      }catch(err) {
+        console.log('ERRO AO CRIAR STOP LOSS')
+        await api.newOrder(symbol, aposta, 'SELL', true)
+        aposta = aposta / 2
+        stopLoss -= 1
+      }
+    }catch(err) {
+      console.log('ERRO AO CRIAR TAKE PROFIT')
+      await api.newOrder(symbol, aposta, 'SELL', true)
     }
 
-    console.log('TAKE PROFIT')
-    console.log(`Preço: ${parseInt(takeProfitOrder.stopPrice)} USDT`)
-    pulaLinha()
-
-    // DEFINIR O STOP LOSS
-    let stopLossOrder = await createStopLossOrder(originalOrderPrice)
-
-    while(!stopLossOrder) {
-      stopLossOrder = await createStopLossOrder(originalOrderPrice)
-    }
-
-    console.log('STOP LOSS')
-    console.log(`Preço: ${parseInt(stopLossOrder.stopPrice)} USDT`)
-    stopLossorderId = stopLossOrder.orderId
-    pulaLinha()
-  }catch (err) {
-    console.log('ERRO AO REALIZAR TRADE')
-    console.log(err)
-    console.log(`Obs: caiu ${stopLoss} vezes seguidas`)
-    linha()
-    pulaLinha()
+  }catch(err) {
+    console.log('ERRO AO COMPRAR A MERCADO')
+    console.log(`STOP LOSS SEGUIDAS: ${stopLoss}`)
   }
-  linha();
-  pulaLinha();
 }
 
 setInterval(async () => {
   if(stopLossorderId === 0) {
+    linha()
+    pulaLinha()
+    stopLoss = 0
+    aposta = tradeBase
     const alavancagem = await api.leverage(symbol, leverage)
     console.log(`Iniciando com a alavancagem de: ${alavancagem.leverage}x`)
+    pulaLinha()
     await realizarTrade()
   }else {
     const status = await getStopLossStatus()
+
+    if(!status) {
+      stopLossorderId = 0
+    }
     
-    if(status !== 'NEW') {
+    if(status && status !== 'NEW') {
       if(status === 'FILLED') {
         stopLoss++
         aposta = aposta * 2
@@ -123,42 +124,9 @@ setInterval(async () => {
         stopLoss = 0
         aposta = tradeBase
       }
+      linha()
+      pulaLinha()
       await realizarTrade()
     }
   }
-
-  /*
-  if(caiu3Status === '') {
-    linha();
-    const alavancagem = await api.leverage(symbol, leverage)
-    console.log(`Iniciando com a alavancagem de: ${alavancagem.leverage}x`)
-    linha();
-    pulaLinha()
-    // realizarTrade()
-  }else {
-    const { status } = await api.getOrder(symbol, caiu3orderId)
-    caiu3Status = status
-
-    if (caiu3Status !== 'NEW') {
-      if (caiu3Status === 'FILLED') {
-        if (caiu3 === 1) {
-          console.log("DEU MERDA!")
-        }else {
-          linha()
-          console.log('PERDI NA APOSTA, DOBRANDO...')
-          linha()
-          tradeBase = 0.256
-          realizarTrade()
-        }
-      }else {
-        linha()
-        console.log('GANHEI NA APOSTA...')
-        linha()
-        caiu3 = 0
-        tradeBase = process.env.TRADE_BASE
-        realizarTrade()
-      }
-    }
-  }
-  */
 }, env.CRAWLER_INTERVAL)

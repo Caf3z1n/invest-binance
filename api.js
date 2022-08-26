@@ -34,8 +34,14 @@ async function getOrder(symbol, orderId) {
   return privateCall('/v1/order', { symbol, orderId })
 }
 
-async function newOrder(symbol, quantity, price, side = 'BUY', type='MARKET') {
-  const data = { symbol, side, type, quantity }
+async function newOrder(symbol, quantity, side = 'BUY', reduceOnly = false, price, type = 'MARKET') {
+  const data = { 
+    symbol, 
+    side, 
+    type, 
+    quantity,
+    reduceOnly,
+  }
 
   if(price) data.price = price;
   if(type === 'LIMIT') data.timeInForce = 'GTC';
