@@ -34,13 +34,14 @@ async function getOrder(symbol, orderId) {
   return privateCall('/v1/order', { symbol, orderId })
 }
 
-async function newOrder(symbol, quantity, side = 'BUY', reduceOnly = false, price, type = 'MARKET') {
+async function newOrder(symbol, quantity, side = 'BUY', reduceOnly = false, type = 'MARKET', price) {
   const data = { 
     symbol, 
     side, 
     type, 
     quantity,
     reduceOnly,
+    side: 'SELL'
   }
 
   if(price) data.price = price;
@@ -55,7 +56,7 @@ async function newOrderLimit(symbol, quantity, stopPrice, type) {
     quantity,
     stopPrice,
     type,
-    side: 'SELL',
+    side: 'BUY',
     positionSide: 'BOTH',
     timeInForce: 'GTE_GTC',
     reduceOnly: true,

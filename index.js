@@ -38,7 +38,7 @@ async function createOriginalOrder() {
 
 async function createTakeProfitOrder(originalOrderPrice) {
   try{
-    const valorTP = parseFloat(parseFloat(originalOrderPrice) + (parseFloat(originalOrderPrice) * porcentagemTake)).toFixed(2)
+    const valorTP = parseFloat(parseFloat(originalOrderPrice) - (parseFloat(originalOrderPrice) * porcentagemTake)).toFixed(2)
     return await api.newOrderLimit(symbol, aposta, valorTP, 'TAKE_PROFIT_MARKET')
   }catch (err) {
     console.log(err)
@@ -47,7 +47,7 @@ async function createTakeProfitOrder(originalOrderPrice) {
 
 async function createStopLossOrder(originalOrderPrice) {
   try {
-    const valorSL = parseFloat(parseFloat(originalOrderPrice) - (parseFloat(originalOrderPrice) * porcentagemStop)).toFixed(2)
+    const valorSL = parseFloat(parseFloat(originalOrderPrice) + (parseFloat(originalOrderPrice) * porcentagemStop)).toFixed(2)
     return await api.newOrderLimit(symbol, aposta, valorSL, 'STOP_MARKET')
   }catch(err) {
     console.log(err)
