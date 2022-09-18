@@ -4,15 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./src/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.27.2",
-    "date-fns": "^2.29.2",
-    "dotenv": "^16.0.1"
+    "date-fns": "^2.29.3",
+    "technicalindicators": "^3.1.0"
   }
 }
